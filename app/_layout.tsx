@@ -7,7 +7,7 @@ export default function RootLayout() {
   return (
     <ClerkProvider tokenCache={tokenCache}>
       <SafeScreen>
-        <Slot />
+        <Slot screenOptions={{ headerShown: false }} />
       </SafeScreen>
     </ClerkProvider>
   );
