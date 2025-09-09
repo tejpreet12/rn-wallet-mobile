@@ -1,13 +1,17 @@
 import { useCallback, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 
 export const useTransaction = (userId: String | undefined) => {
   // Use 10.0.2.2 for Android emulator, localhost for iOS
-  const API_URL =
-    Platform.select({
-      android: "http://10.0.2.2:5001/api",
-      ios: "http://localhost:5001/api",
-    }) || "http://localhost:5001/api"; // fallback
+  // const API_URL =
+  //   Platform.select({
+  //     android: "http://10.0.2.2:5001/api",
+  //     ios: "http://localhost:5001/api",
+  //   }) || "http://localhost:5001/api"; // fallback
+
+  const API_URL = "https://rn-wallet-backend-cwz0.onrender.com/api";
+
+  console.log(userId, "UserID in hook");
 
   const [transaction, setTransaction] = useState<any[]>([]);
   const [summary, setSummary] = useState({
@@ -20,6 +24,9 @@ export const useTransaction = (userId: String | undefined) => {
   const fetchTransactions = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/transactions/${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setTransaction(data);
     } catch (error) {
@@ -30,10 +37,15 @@ export const useTransaction = (userId: String | undefined) => {
   const fetchSummary = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/transactions/summary/${userId}`);
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseText = await response.text(); // Get response as text first
+      console.log("Summary Response:", responseText); // Log the raw response
+      const data = JSON.parse(responseText); // Then parse it
       setSummary(data);
     } catch (error) {
-      console.error("Error fetching summary:", error);
+      console.error("Error fetching summary:", error, "UserId:", userId);
     }
   }, [userId]);
 
